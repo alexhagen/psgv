@@ -35,6 +35,9 @@ class psgv(object):
             if isinstance(value, dict):
                 value = envdict(value)
                 value.parent = self
+            if isinstance(value, list):
+                value = envlist(value)
+                value.parent = self
             return value
         else:
             return False
@@ -46,7 +49,10 @@ class psgv(object):
             value.parent = self
             self._val = value
         if isinstance(value, bool):
-            print value
+            self._val = value
+        if isinstance(value, list):
+            value = envlist(value)
+            value.parent = self
             self._val = value
         if self._key is not None:
             with open('/var/tmp/' + self._key, 'w') as f:
@@ -74,10 +80,39 @@ class envdict(dict):
         self.parent.val = self
 
     def update(self, *args, **kwargs):
-        print 'update', args, kwargs
         for k, v in dict(*args, **kwargs).iteritems():
             self[k] = v
 
+class envlist(list):
+    def __init__(self, *args):
+        super(envlist, self).__init__(*args)
+        self.parent = None
+
+    def __getitem__(self, key):
+        val = super(envlist, self).__getitem__(key)
+        return val
+
+    def __setitem__(self, key, val):
+        _list = list(self.parent.val)
+        super(envlist, self).__setitem__(key, val)
+        self.parent.val = self
+
+    def __add__(self, val):
+        _list = list(self.parent.val)
+        if isinstance(val, list):
+            theval = val
+        else:
+            theval = [val]
+        _list = super(envlist, self).__add__(theval)
+        super(envlist, self).__init__(_list)
+        self.parent.val = self
+        return self
+
+    def extend(self, *args):
+        _list = list(self.parent.val)
+        for arg in args:
+            for val in arg:
+                self.__add__(val)
 
 """
 import sys, token, tokenize
