@@ -54,6 +54,8 @@ class psgv(object):
             value = envlist(value)
             value.parent = self
             self._val = value
+        else:
+            self._val = value
         if self._key is not None:
             with open('/var/tmp/' + self._key, 'w') as f:
                 json.dump(self._val, f)
