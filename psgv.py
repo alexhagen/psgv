@@ -9,6 +9,7 @@ class psgv(object):
         self._val = None
         self._key = key
 
+
     @property
     def key(self):
         """ The environment variable key
@@ -29,7 +30,8 @@ class psgv(object):
     @property
     def val(self):
         """I'm the 'x' property."""
-        if self._key is not None:
+        if (self._key is not None) and \
+                (os.path.isfile(os.path.join('/var/tmp/', self._key))):
             with open('/var/tmp/' + self._key, 'r') as f:
                 value = json.load(f)
             if isinstance(value, dict):
